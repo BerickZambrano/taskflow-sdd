@@ -1,5 +1,9 @@
 # TaskFlow
 
+<p align="center">
+  <img src="taskflow-sdd/frontend/public/favicon.svg" alt="Logo de TaskFlow" width="96" height="96" />
+</p>
+
 TaskFlow es una herramienta personal para organizar **proyectos y estudios**: proyectos,
 tareas en un tablero Kanban, etiquetas por materia, registro de tiempo y estadísticas de
 constancia (racha). La interfaz está en español; el código y los identificadores, en inglés.
