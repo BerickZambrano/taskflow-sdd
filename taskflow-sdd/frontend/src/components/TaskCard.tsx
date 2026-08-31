@@ -1,3 +1,5 @@
+import type { DragEvent } from 'react'
+
 import type { TaskOut, TaskStatus } from '../api/types'
 import { DueDate, PriorityMark, StatusChip } from './ui'
 import { ArrowRightIcon, CheckIcon } from './icons'
@@ -18,15 +20,29 @@ interface TaskCardProps {
   task: TaskOut
   onAdvance: (task: TaskOut) => void
   onEdit: (task: TaskOut) => void
+  onDragStart?: (event: DragEvent<HTMLLIElement>) => void
+  onDragEnd?: (event: DragEvent<HTMLLIElement>) => void
   busy?: boolean
 }
 
-export function TaskCard({ task, onAdvance, onEdit, busy }: TaskCardProps) {
+export function TaskCard({
+  task,
+  onAdvance,
+  onEdit,
+  onDragStart,
+  onDragEnd,
+  busy,
+}: TaskCardProps) {
   const next = NEXT[task.status]
   const isDone = task.status === 'done'
 
   return (
-    <li className={`task-card ${isDone ? 'done' : ''}`}>
+    <li
+      className={`task-card ${isDone ? 'done' : ''} ${busy ? 'dragging' : ''}`}
+      draggable
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
+    >
       <div className="task-main">
         <h3 className="task-title">{task.title}</h3>
         {task.description && <p className="task-desc">{task.description}</p>}

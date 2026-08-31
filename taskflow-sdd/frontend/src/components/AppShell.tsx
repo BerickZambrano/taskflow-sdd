@@ -14,6 +14,7 @@ interface AppShellProps {
   onSelectProject: (id: string) => void
   onProjectCreated: (project: ProjectOut) => void
   onProjectStatusChanged: () => void
+  onTaskStatusChanged: (projectId: string) => void
   onToggleTheme: () => void
   onLogout: () => void
 }
@@ -26,6 +27,7 @@ export function AppShell({
   onSelectProject,
   onProjectCreated,
   onProjectStatusChanged,
+  onTaskStatusChanged,
   onToggleTheme,
   onLogout,
 }: AppShellProps) {
@@ -68,6 +70,7 @@ export function AppShell({
             project={selected}
             onProjectCreated={onProjectCreated}
             onProjectStatusChanged={onProjectStatusChanged}
+            onTaskStatusChanged={onTaskStatusChanged}
             onShowError={showError}
           />
         ) : (

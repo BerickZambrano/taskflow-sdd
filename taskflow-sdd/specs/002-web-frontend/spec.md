@@ -18,7 +18,8 @@ una tarea en un proyecto inexistente) con diálogos accionables.
 - **US-1**: Como visitante, quiero registrarme e iniciar sesión para acceder a la app.
 - **US-2**: Como usuario, quiero mantener mi sesión abierta entre visitas y poder cerrarla.
 - **US-3**: Como usuario, quiero ver y crear proyectos desde la barra lateral.
-- **US-4**: Como usuario, quiero ver las tareas de un proyecto con filtros y orden.
+- **US-4**: Como usuario, quiero ver las tareas del proyecto en columnas por estado y
+  moverlas arrastrando.
 - **US-5**: Como usuario, quiero crear tareas con sus campos.
 - **US-6**: Como usuario, quiero avanzar el estado de una tarea paso a paso.
 - **US-7**: Como usuario, quiero editar una tarea no completada.
@@ -37,9 +38,14 @@ una tarea en un proyecto inexistente) con diálogos accionables.
   sesión, ENTONCES el sistema DEBE eliminar el token local.
 - **RF-3** — Proyectos en la barra lateral. CUANDO el usuario abre la app, ENTONCES el
   sistema DEBE listar sus proyectos y permitir seleccionar uno y crear otro.
-- **RF-4** — Vista de tareas. CUANDO hay un proyecto seleccionado, ENTONCES el sistema
-  DEBE mostrar sus tareas con filtros por estado y prioridad, orden por prioridad o fecha
-  límite y paginación.
+- **RF-4** — Tablero de tareas. CUANDO hay un proyecto seleccionado, ENTONCES el sistema
+  DEBE mostrar las tareas en tres columnas por estado (`Por hacer`, `En curso`,
+  `Completada`), con filtro por prioridad y orden por prioridad o fecha límite dentro de
+  cada columna.
+- **RF-4b** — Mover tarea entre columnas. CUANDO el usuario arrastra una tarea a otra
+  columna (o la avanza con el botón), ENTONCES el sistema DEBE actualizar su estado y
+  moverla de columna; SI la transición no está permitida (retroceder o saltar pasos),
+  ENTONCES el sistema DEBE advertirlo en español y NO moverla.
 - **RF-5** — Crear tarea. CUANDO el usuario envía una tarea válida, ENTONCES el sistema
   DEBE crearla; SI el proyecto no existe, ENTONCES el sistema DEBE abrir el modal de
   RF-9.

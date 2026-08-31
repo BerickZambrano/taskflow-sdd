@@ -83,6 +83,16 @@ export default function App() {
     loadProjects().catch(() => undefined)
   }
 
+  const handleTaskStatusChanged = useCallback(async (projectId: string) => {
+    const all = await api.listTasks(projectId, { page_size: 1 })
+    const done = await api.listTasks(projectId, { status: 'done', page_size: 1 })
+    setProjects((current) =>
+      current.map((p) =>
+        p.id === projectId ? { ...p, total: all.total, done: done.total } : p,
+      ),
+    )
+  }, [])
+
   if (!token) {
     return <AuthPage onAuthed={handleAuthed} />
   }
@@ -96,6 +106,7 @@ export default function App() {
       onSelectProject={setSelectedId}
       onProjectCreated={handleProjectCreated}
       onProjectStatusChanged={handleProjectStatusChanged}
+      onTaskStatusChanged={handleTaskStatusChanged}
       onToggleTheme={() => setTheme((t) => (t === 'light' ? 'dark' : 'light'))}
       onLogout={handleLogout}
     />

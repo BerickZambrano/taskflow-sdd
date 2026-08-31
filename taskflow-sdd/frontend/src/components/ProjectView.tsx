@@ -14,23 +14,28 @@ interface ProjectViewProps {
   project: ProjectWithStats
   onProjectCreated: (project: ProjectOut) => void
   onProjectStatusChanged: () => void
+  onTaskStatusChanged: (projectId: string) => void
   onShowError: (message: string) => void
 }
 
-const PAGE_SIZE = 20
+const PAGE_SIZE = 100
+
+const COLUMNS: { status: TaskStatus; title: string }[] = [
+  { status: 'todo', title: 'Por hacer' },
+  { status: 'in_progress', title: 'En curso' },
+  { status: 'done', title: 'Completada' },
+]
 
 export function ProjectView({
   project,
   onProjectCreated,
   onProjectStatusChanged,
+  onTaskStatusChanged,
   onShowError,
 }: ProjectViewProps) {
   const [tasks, setTasks] = useState<TaskOut[]>([])
-  const [total, setTotal] = useState(0)
-  const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(true)
 
-  const [filterStatus, setFilterStatus] = useState<TaskStatus | ''>('')
   const [filterPriority, setFilterPriority] = useState<Priority | ''>('')
   const [sortBy, setSortBy] = useState<'priority' | 'due_date'>('priority')
   const [order, setOrder] = useState<'asc' | 'desc'>('asc')
@@ -39,37 +44,39 @@ export function ProjectView({
   const [editing, setEditing] = useState<TaskOut | null>(null)
   const [missingDraft, setMissingDraft] = useState<TaskDraft | null>(null)
   const [confirmInactive, setConfirmInactive] = useState(false)
-  const [advancingId, setAdvancingId] = useState<string | null>(null)
+  const [draggingId, setDraggingId] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
     try {
       const data = await api.listTasks(project.id, {
-        status: filterStatus || undefined,
         priority: filterPriority || undefined,
         sort_by: sortBy,
         order,
-        page,
+        page: 1,
         page_size: PAGE_SIZE,
       })
       setTasks(data.items)
-      setTotal(data.total)
     } catch (err) {
       if (err instanceof ApiError) onShowError(err.message)
     } finally {
       setLoading(false)
     }
-  }, [project.id, filterStatus, filterPriority, sortBy, order, page, onShowError])
-
-  useEffect(() => {
-    setPage(1)
-  }, [project.id, filterStatus, filterPriority, sortBy, order])
+  }, [project.id, filterPriority, sortBy, order, onShowError])
 
   useEffect(() => {
     load()
   }, [load])
 
-  const totalPages = useMemo(() => Math.max(1, Math.ceil(total / PAGE_SIZE)), [total])
+  const columns = useMemo(() => {
+    const byStatus: Record<TaskStatus, TaskOut[]> = {
+      todo: [],
+      in_progress: [],
+      done: [],
+    }
+    for (const task of tasks) byStatus[task.status].push(task)
+    return byStatus
+  }, [tasks])
 
   const closeForm = () => {
     setFormOpen(false)
@@ -82,6 +89,7 @@ export function ProjectView({
         await api.updateTask(editing.id, draft)
       } else {
         await api.createTask(project.id, draft)
+        onTaskStatusChanged(project.id)
       }
       closeForm()
       await load()
@@ -107,18 +115,30 @@ export function ProjectView({
     }
   }
 
-  const handleAdvance = async (task: TaskOut) => {
-    setAdvancingId(task.id)
+  const moveTask = async (taskId: string, target: TaskStatus) => {
+    const task = tasks.find((t) => t.id === taskId)
+    if (!task || task.status === target) return
     try {
-      const next: TaskStatus =
-        task.status === 'todo' ? 'in_progress' : 'done'
-      await api.updateTask(task.id, { status: next })
-      await load()
+      const updated = await api.updateTask(taskId, { status: target })
+      setTasks((prev) => prev.map((t) => (t.id === taskId ? updated : t)))
+      onTaskStatusChanged(project.id)
     } catch (err) {
       if (err instanceof ApiError) onShowError(err.message)
     } finally {
-      setAdvancingId(null)
+      setDraggingId(null)
     }
+  }
+
+  const handleAdvance = async (task: TaskOut) => {
+    const next: TaskStatus = task.status === 'todo' ? 'in_progress' : 'done'
+    await moveTask(task.id, next)
+  }
+
+  const handleDrop = (target: TaskStatus) => (event: React.DragEvent) => {
+    event.preventDefault()
+    const taskId = event.dataTransfer.getData('text/plain')
+    if (taskId) moveTask(taskId, target)
+    setDraggingId(null)
   }
 
   const handleInactivate = async () => {
@@ -176,17 +196,6 @@ export function ProjectView({
       <div className="task-toolbar">
         <Select
           options={[
-            { value: '', label: 'Estado: todos' },
-            { value: 'todo', label: 'Por hacer' },
-            { value: 'in_progress', label: 'En curso' },
-            { value: 'done', label: 'Completadas' },
-          ]}
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value as TaskStatus | '')}
-          aria-label="Filtrar por estado"
-        />
-        <Select
-          options={[
             { value: '', label: 'Prioridad: todas' },
             { value: 'low', label: 'Baja' },
             { value: 'medium', label: 'Media' },
@@ -217,53 +226,55 @@ export function ProjectView({
         <Spinner />
       ) : tasks.length === 0 ? (
         <EmptyState
-          title={total === 0 ? 'Todavía no hay tareas' : 'Sin resultados'}
-          message={
-            total === 0
-              ? 'Crea la primera tarea de este proyecto.'
-              : 'Ninguna tarea coincide con los filtros.'
-          }
+          title="Todavía no hay tareas"
+          message="Crea la primera tarea de este proyecto."
           action={
-            total === 0 ? (
-              <Button variant="primary" onClick={() => setFormOpen(true)}>
-                <PlusIcon />
-                Crear tarea
-              </Button>
-            ) : undefined
+            <Button variant="primary" onClick={() => setFormOpen(true)}>
+              <PlusIcon />
+              Crear tarea
+            </Button>
           }
         />
       ) : (
-        <ul className="task-list">
-          {tasks.map((task) => (
-            <TaskCard
-              key={task.id}
-              task={task}
-              busy={advancingId === task.id}
-              onAdvance={handleAdvance}
-              onEdit={(t) => {
-                setEditing(t)
-                setFormOpen(true)
-              }}
-            />
+        <div className="board">
+          {COLUMNS.map((column) => (
+            <div
+              key={column.status}
+              className={`board-column ${draggingId ? 'drop-target' : ''}`}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={handleDrop(column.status)}
+            >
+              <header className="board-column-head">
+                <span className="board-column-title">{column.title}</span>
+                <span className="board-column-count">
+                  {columns[column.status].length}
+                </span>
+              </header>
+              <ul className="board-column-body">
+                {columns[column.status].map((task) => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    busy={draggingId === task.id}
+                    onAdvance={handleAdvance}
+                    onEdit={(t) => {
+                      setEditing(t)
+                      setFormOpen(true)
+                    }}
+                    onDragStart={(event) => {
+                      setDraggingId(task.id)
+                      event.dataTransfer.setData('text/plain', task.id)
+                      event.dataTransfer.effectAllowed = 'move'
+                    }}
+                    onDragEnd={() => setDraggingId(null)}
+                  />
+                ))}
+                {columns[column.status].length === 0 && (
+                  <li className="board-empty">Suelta aquí una tarea</li>
+                )}
+              </ul>
+            </div>
           ))}
-        </ul>
-      )}
-
-      {total > PAGE_SIZE && (
-        <div className="pagination">
-          <Button variant="quiet" disabled={page <= 1} onClick={() => setPage(page - 1)}>
-            ← Anterior
-          </Button>
-          <span className="pagination-info">
-            Página {page} de {totalPages}
-          </span>
-          <Button
-            variant="quiet"
-            disabled={page >= totalPages}
-            onClick={() => setPage(page + 1)}
-          >
-            Siguiente →
-          </Button>
         </div>
       )}
 

@@ -322,6 +322,70 @@
   min-width: 150px;
 }
 
+/* ---------- Tablero Kanban ---------- */
+.board {
+  display: grid;
+  grid-template-columns: repeat(var(--board-cols, 3), 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.board-column {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  min-height: 120px;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.board-column.drop-target {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.board-column-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 4px 10px;
+}
+
+.board-column-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.board-column-count {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-2);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 1px 9px;
+}
+
+.board-column-body {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.board-empty {
+  text-align: center;
+  color: var(--ink-3);
+  font-size: 13px;
+  padding: 26px 10px;
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius);
+}
+
 .task-list {
   list-style: none;
   margin: 0;
@@ -351,6 +415,10 @@
   color: var(--ink-3);
   text-decoration: line-through;
   text-decoration-thickness: 1.5px;
+}
+
+.task-card.dragging {
+  opacity: 0.55;
 }
 
 .task-main {
@@ -428,6 +496,9 @@
   }
   .project-head {
     flex-direction: column;
+  }
+  .board {
+    --board-cols: 1;
   }
   .task-card {
     flex-direction: column;
