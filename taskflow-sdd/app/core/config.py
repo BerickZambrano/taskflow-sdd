@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     secret_key: str
     access_token_expire_minutes: int = 1440
     algorithm: str = "HS256"
+    frontend_url: str = "http://localhost:5173"
 
 
 @lru_cache
