@@ -9,5 +9,17 @@ class Base(DeclarativeBase):
 
 
 settings = get_settings()
-engine = create_engine(settings.database_url)
-SessionLocal = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
+
+database_url = settings.database_url.replace(
+    "postgresql://",
+    "postgresql+psycopg://",
+    1,
+)
+
+engine = create_engine(database_url)
+
+SessionLocal = sessionmaker(
+    bind=engine,
+    autoflush=False,
+    expire_on_commit=False,
+)   
