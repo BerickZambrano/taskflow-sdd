@@ -78,11 +78,22 @@ describe('TaskForm', () => {
       due_date: '2026-09-15',
       assignee_id: null,
       project_id: 'p1',
+      completed_at: null,
+      tags: [],
       created_at: '2026-01-01T00:00:00Z',
       updated_at: '2026-01-01T00:00:00Z',
     }
     const onSave = vi.fn().mockResolvedValue(undefined)
-    render(<TaskForm initial={task} onSave={onSave} onCancel={vi.fn()} />)
+    render(
+      <TaskForm
+        initial={task}
+        tags={[]}
+        onSave={onSave}
+        onCreateTag={vi.fn()}
+        onError={vi.fn()}
+        onCancel={vi.fn()}
+      />,
+    )
 
     expect(screen.getByDisplayValue('Diseñar landing')).toBeInTheDocument()
     expect(screen.getByDisplayValue('2026-09-15')).toBeInTheDocument()
@@ -95,6 +106,7 @@ describe('TaskForm', () => {
     await waitFor(() =>
       expect(onSave).toHaveBeenCalledWith(
         expect.objectContaining({ title: 'Nuevo título', priority: 'high' }),
+        [],
       ),
     )
   })

@@ -2,9 +2,10 @@ import uuid
 from datetime import date
 
 from sqlalchemy import case, func, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.core.enums import Priority, TaskStatus
+from app.models.tag import Tag
 from app.models.task import Task
 
 
@@ -13,7 +14,8 @@ class TaskRepository:
         self._session = session
 
     def get_by_id(self, task_id: uuid.UUID) -> Task | None:
-        return self._session.get(Task, task_id)
+        stmt = select(Task).options(selectinload(Task.tags)).where(Task.id == task_id)
+        return self._session.scalar(stmt)
 
     def has_incomplete(self, project_id: uuid.UUID) -> bool:
         stmt = (
@@ -28,6 +30,7 @@ class TaskRepository:
         project_id: uuid.UUID,
         status: TaskStatus | None = None,
         priority: Priority | None = None,
+        tag_id: uuid.UUID | None = None,
         sort_by: str = "priority",
         order: str = "asc",
         page: int = 1,
@@ -38,6 +41,8 @@ class TaskRepository:
             filters.append(Task.status == status)
         if priority is not None:
             filters.append(Task.priority == priority)
+        if tag_id is not None:
+            filters.append(Task.tags.any(Tag.id == tag_id))
 
         count_stmt = select(func.count()).select_from(Task).where(*filters)
         total = self._session.scalar(count_stmt) or 0
@@ -58,6 +63,7 @@ class TaskRepository:
 
         stmt = (
             select(Task)
+            .options(selectinload(Task.tags))
             .where(*filters)
             .order_by(*ordering)
             .offset((page - 1) * page_size)

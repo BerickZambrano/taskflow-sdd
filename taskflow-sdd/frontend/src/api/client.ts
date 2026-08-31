@@ -1,10 +1,13 @@
 import type {
   LoginResponse,
   ProjectOut,
+  StatsOut,
+  TagOut,
   TaskDraft,
   TaskListOut,
   TaskListParams,
   TaskOut,
+  TimeEntryOut,
   UserOut,
 } from './types'
 
@@ -101,6 +104,7 @@ export const api = {
     const query = new URLSearchParams()
     if (params.status) query.set('status', params.status)
     if (params.priority) query.set('priority', params.priority)
+    if (params.tag_id) query.set('tag_id', params.tag_id)
     if (params.sort_by) query.set('sort_by', params.sort_by)
     if (params.order) query.set('order', params.order)
     if (params.page) query.set('page', String(params.page))
@@ -119,5 +123,37 @@ export const api = {
 
   async deleteTask(id: string): Promise<void> {
     return request(`/tasks/${id}`, { method: 'DELETE' })
+  },
+
+  async listTags(): Promise<TagOut[]> {
+    return request('/tags')
+  },
+
+  async createTag(name: string): Promise<TagOut> {
+    return request('/tags', json('POST', { name }))
+  },
+
+  async deleteTag(id: string): Promise<void> {
+    return request(`/tags/${id}`, { method: 'DELETE' })
+  },
+
+  async assignTag(taskId: string, tagId: string): Promise<TagOut> {
+    return request(`/tasks/${taskId}/tags`, json('POST', { tag_id: tagId }))
+  },
+
+  async removeTag(taskId: string, tagId: string): Promise<TaskOut> {
+    return request(`/tasks/${taskId}/tags/${tagId}`, { method: 'DELETE' })
+  },
+
+  async createTimeEntry(payload: {
+    task_id?: string | null
+    minutes: number
+    entry_date?: string | null
+  }): Promise<TimeEntryOut> {
+    return request('/time-entries', json('POST', payload))
+  },
+
+  async getStats(): Promise<StatsOut> {
+    return request('/stats')
   },
 }

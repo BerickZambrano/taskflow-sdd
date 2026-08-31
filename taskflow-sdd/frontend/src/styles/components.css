@@ -290,3 +290,225 @@
   margin: 0;
   font-size: 14px;
 }
+
+/* ---------- Etiquetas ---------- */
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 500;
+  border: 1px solid;
+  background: color-mix(in srgb, currentColor 8%, transparent);
+}
+
+.task-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 6px 0 8px;
+}
+
+.tag-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tag-picker-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag-pick {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 12.5px;
+  cursor: pointer;
+  color: var(--ink-2);
+}
+
+.tag-pick.active {
+  background: color-mix(in srgb, currentColor 12%, transparent);
+  font-weight: 500;
+}
+
+.tag-pick-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.tag-picker-empty {
+  font-size: 12.5px;
+  color: var(--ink-3);
+}
+
+.tag-picker-new {
+  display: flex;
+  gap: 8px;
+}
+.tag-picker-new .input {
+  flex: 1;
+}
+
+.tag-list {
+  list-style: none;
+  margin: 0 0 14px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.tag-list-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 2px;
+  border-bottom: 1px solid var(--border);
+}
+
+.tag-list-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.tag-list-name {
+  flex: 1;
+  font-size: 14px;
+}
+
+.tag-list-empty {
+  color: var(--ink-3);
+  font-size: 13.5px;
+  padding: 12px 2px;
+}
+
+/* ---------- Badges de vencida / tiempo ---------- */
+.due-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+.due-badge.overdue {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+.due-badge.due_soon {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+/* ---------- Estadísticas ---------- */
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat-value {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--ink-2);
+}
+
+.stat-section {
+  margin-bottom: 18px;
+}
+
+.stat-section h4 {
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.stat-bars {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stat-bars li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12.5px;
+}
+
+.stat-bar-label {
+  width: 72px;
+  color: var(--ink-2);
+}
+
+.stat-bar {
+  flex: 1;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--surface-3);
+  overflow: hidden;
+}
+.stat-bar div {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+}
+
+.stat-bar-value {
+  width: 48px;
+  text-align: right;
+  color: var(--ink-2);
+}
+
+.stat-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.stat-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 2px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13.5px;
+}
+
+.stat-list-value {
+  color: var(--ink-2);
+}
+
+.stat-empty {
+  color: var(--ink-3);
+  font-size: 13px;
+  margin: 0;
+}

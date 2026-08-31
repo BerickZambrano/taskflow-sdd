@@ -1,8 +1,8 @@
 import type { DragEvent } from 'react'
 
 import type { TaskOut, TaskStatus } from '../api/types'
-import { DueDate, PriorityMark, StatusChip } from './ui'
-import { ArrowRightIcon, CheckIcon } from './icons'
+import { DueBadge, DueDate, PriorityMark, StatusChip, TagChip } from './ui'
+import { ArrowRightIcon, CheckIcon, TimerIcon } from './icons'
 
 const NEXT: Record<TaskStatus, TaskStatus | null> = {
   todo: 'in_progress',
@@ -20,6 +20,7 @@ interface TaskCardProps {
   task: TaskOut
   onAdvance: (task: TaskOut) => void
   onEdit: (task: TaskOut) => void
+  onLogTime: (task: TaskOut) => void
   onDragStart?: (event: DragEvent<HTMLLIElement>) => void
   onDragEnd?: (event: DragEvent<HTMLLIElement>) => void
   busy?: boolean
@@ -29,6 +30,7 @@ export function TaskCard({
   task,
   onAdvance,
   onEdit,
+  onLogTime,
   onDragStart,
   onDragEnd,
   busy,
@@ -44,8 +46,18 @@ export function TaskCard({
       onDragEnd={onDragEnd}
     >
       <div className="task-main">
-        <h3 className="task-title">{task.title}</h3>
+        <div className="task-title-line">
+          <h3 className="task-title">{task.title}</h3>
+          <DueBadge dueDate={task.due_date} completed={isDone} />
+        </div>
         {task.description && <p className="task-desc">{task.description}</p>}
+        {task.tags.length > 0 && (
+          <div className="task-tags">
+            {task.tags.map((tag) => (
+              <TagChip key={tag.id} tag={tag} />
+            ))}
+          </div>
+        )}
         <div className="task-meta">
           <StatusChip status={task.status} />
           <PriorityMark priority={task.priority} />
@@ -63,6 +75,14 @@ export function TaskCard({
             {NEXT_LABEL[task.status]}
           </button>
         )}
+        <button
+          className="icon-btn"
+          onClick={() => onLogTime(task)}
+          title="Registrar tiempo"
+          aria-label="Registrar tiempo"
+        >
+          <TimerIcon />
+        </button>
         <button
           className="btn btn-quiet"
           onClick={() => onEdit(task)}

@@ -8,6 +8,9 @@ export default defineConfig({
       '/auth': 'http://localhost:8000',
       '/projects': 'http://localhost:8000',
       '/tasks': 'http://localhost:8000',
+      '/tags': 'http://localhost:8000',
+      '/time-entries': 'http://localhost:8000',
+      '/stats': 'http://localhost:8000',
     },
   },
   test: {

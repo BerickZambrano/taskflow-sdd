@@ -36,7 +36,10 @@ def _clean_database() -> None:
     yield
     with engine.begin() as conn:
         conn.execute(
-            text("TRUNCATE TABLE tasks, projects, users RESTART IDENTITY CASCADE")
+            text(
+                "TRUNCATE TABLE task_tags, time_entries, tags, tasks, projects, "
+                "users RESTART IDENTITY CASCADE"
+            )
         )
 
 

@@ -3,6 +3,7 @@ from datetime import date, datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.api.schemas.tag import TagOut
 from app.core.enums import Priority, TaskStatus
 
 
@@ -34,6 +35,8 @@ class TaskOut(BaseModel):
     due_date: date | None
     assignee_id: uuid.UUID | None
     project_id: uuid.UUID
+    completed_at: datetime | None
+    tags: list[TagOut] = []
     created_at: datetime
     updated_at: datetime
 

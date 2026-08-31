@@ -1,12 +1,16 @@
 import { useState } from 'react'
 
 import { ApiError } from '../api/client'
-import type { Priority, TaskDraft, TaskOut } from '../api/types'
+import type { Priority, TagOut, TaskDraft, TaskOut } from '../api/types'
 import { Button, Field, Select, TextArea, TextInput } from './ui'
+import { TagPicker } from './TagPicker'
 
 interface TaskFormProps {
   initial?: TaskOut
-  onSave: (draft: TaskDraft) => Promise<void>
+  tags: TagOut[]
+  onSave: (draft: TaskDraft, tagIds: string[]) => Promise<void>
+  onCreateTag: (name: string) => Promise<TagOut>
+  onError: (message: string) => void
   onCancel: () => void
 }
 
@@ -17,7 +21,7 @@ const emptyDraft: TaskDraft = {
   due_date: null,
 }
 
-export function TaskForm({ initial, onSave, onCancel }: TaskFormProps) {
+export function TaskForm({ initial, tags, onSave, onCreateTag, onError, onCancel }: TaskFormProps) {
   const [draft, setDraft] = useState<TaskDraft>(
     initial
       ? {
@@ -28,6 +32,7 @@ export function TaskForm({ initial, onSave, onCancel }: TaskFormProps) {
         }
       : emptyDraft,
   )
+  const [tagIds, setTagIds] = useState<string[]>(initial?.tags.map((t) => t.id) ?? [])
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
@@ -36,12 +41,15 @@ export function TaskForm({ initial, onSave, onCancel }: TaskFormProps) {
     setBusy(true)
     setError(null)
     try {
-      await onSave({
-        ...draft,
-        title: draft.title.trim(),
-        description: draft.description?.trim() || null,
-        due_date: draft.due_date || null,
-      })
+      await onSave(
+        {
+          ...draft,
+          title: draft.title.trim(),
+          description: draft.description?.trim() || null,
+          due_date: draft.due_date || null,
+        },
+        tagIds,
+      )
     } catch (err) {
       if (err instanceof ApiError) setError(err.message)
       else setError('No se pudo conectar con el servidor.')
@@ -88,6 +96,15 @@ export function TaskForm({ initial, onSave, onCancel }: TaskFormProps) {
             onChange={(e) => setDraft({ ...draft, due_date: e.target.value })}
           />
         </Field>
+      </div>
+      <div style={{ margin: '10px 0' }}>
+        <TagPicker
+          tags={tags}
+          selected={tagIds}
+          onChange={setTagIds}
+          onCreate={onCreateTag}
+          onError={onError}
+        />
       </div>
       <div className="modal-actions">
         <Button type="button" onClick={onCancel}>

@@ -13,6 +13,8 @@ from app.core.enums import Priority, TaskStatus
 
 if TYPE_CHECKING:
     from app.models.project import Project
+    from app.models.tag import Tag
+    from app.models.time_entry import TimeEntry
     from app.models.user import User
 
 
@@ -29,6 +31,9 @@ class Task(Base):
         SAEnum(TaskStatus, native_enum=False, length=20), default=TaskStatus.TODO
     )
     due_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    completed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     assignee_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )
@@ -44,3 +49,7 @@ class Task(Base):
 
     project: Mapped[Project] = relationship(back_populates="tasks")
     assignee: Mapped[User | None] = relationship(back_populates="tasks")
+    tags: Mapped[list[Tag]] = relationship(
+        secondary="task_tags", back_populates="tasks"
+    )
+    time_entries: Mapped[list[TimeEntry]] = relationship(back_populates="task")

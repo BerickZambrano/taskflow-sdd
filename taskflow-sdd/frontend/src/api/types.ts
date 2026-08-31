@@ -17,6 +17,13 @@ export interface ProjectOut {
   updated_at: string
 }
 
+export interface TagOut {
+  id: string
+  name: string
+  color: string
+  created_at: string
+}
+
 export interface TaskOut {
   id: string
   title: string
@@ -26,6 +33,8 @@ export interface TaskOut {
   due_date: string | null
   assignee_id: string | null
   project_id: string
+  completed_at: string | null
+  tags: TagOut[]
   created_at: string
   updated_at: string
 }
@@ -52,8 +61,27 @@ export interface TaskDraft {
 export interface TaskListParams {
   status?: TaskStatus
   priority?: Priority
+  tag_id?: string
   sort_by?: 'priority' | 'due_date'
   order?: 'asc' | 'desc'
   page?: number
   page_size?: number
+}
+
+export interface TimeEntryOut {
+  id: string
+  task_id: string | null
+  minutes: number
+  entry_date: string
+  created_at: string
+}
+
+export interface StatsOut {
+  streak: number
+  days_studied: number
+  tasks_completed: number
+  minutes_total: number
+  minutes_by_day: { date: string; minutes: number }[]
+  minutes_by_tag: { tag_id: string; name: string; minutes: number }[]
+  minutes_by_project: { project_id: string; name: string; minutes: number }[]
 }

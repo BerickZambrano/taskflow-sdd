@@ -1,14 +1,17 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { api, ApiError } from '../api/client'
-import type { Priority, ProjectOut, TaskDraft, TaskOut, TaskStatus } from '../api/types'
+import type { Priority, ProjectOut, TagOut, TaskDraft, TaskOut, TaskStatus } from '../api/types'
 import type { ProjectWithStats } from './Sidebar'
 import { Modal } from './Modal'
 import { ProjectMissingModal } from './ProjectMissingModal'
+import { StatsPanel } from './StatsPanel'
+import { TagManager } from './TagManager'
 import { TaskCard } from './TaskCard'
 import { TaskForm } from './TaskForm'
+import { TimeLogModal } from './TimeLogModal'
 import { Button, EmptyState, ProgressBar, Select, Spinner } from './ui'
-import { PlusIcon } from './icons'
+import { PlusIcon, TagIcon } from './icons'
 
 interface ProjectViewProps {
   project: ProjectWithStats
@@ -34,9 +37,11 @@ export function ProjectView({
   onShowError,
 }: ProjectViewProps) {
   const [tasks, setTasks] = useState<TaskOut[]>([])
+  const [tags, setTags] = useState<TagOut[]>([])
   const [loading, setLoading] = useState(true)
 
   const [filterPriority, setFilterPriority] = useState<Priority | ''>('')
+  const [filterTag, setFilterTag] = useState<string>('')
   const [sortBy, setSortBy] = useState<'priority' | 'due_date'>('priority')
   const [order, setOrder] = useState<'asc' | 'desc'>('asc')
 
@@ -45,12 +50,24 @@ export function ProjectView({
   const [missingDraft, setMissingDraft] = useState<TaskDraft | null>(null)
   const [confirmInactive, setConfirmInactive] = useState(false)
   const [draggingId, setDraggingId] = useState<string | null>(null)
+  const [tagManagerOpen, setTagManagerOpen] = useState(false)
+  const [statsOpen, setStatsOpen] = useState(false)
+  const [timeTask, setTimeTask] = useState<TaskOut | null>(null)
+
+  const loadTags = useCallback(async () => {
+    try {
+      setTags(await api.listTags())
+    } catch (err) {
+      if (err instanceof ApiError) onShowError(err.message)
+    }
+  }, [onShowError])
 
   const load = useCallback(async () => {
     setLoading(true)
     try {
       const data = await api.listTasks(project.id, {
         priority: filterPriority || undefined,
+        tag_id: filterTag || undefined,
         sort_by: sortBy,
         order,
         page: 1,
@@ -62,7 +79,11 @@ export function ProjectView({
     } finally {
       setLoading(false)
     }
-  }, [project.id, filterPriority, sortBy, order, onShowError])
+  }, [project.id, filterPriority, filterTag, sortBy, order, onShowError])
+
+  useEffect(() => {
+    loadTags()
+  }, [loadTags])
 
   useEffect(() => {
     load()
@@ -83,16 +104,25 @@ export function ProjectView({
     setEditing(null)
   }
 
-  const handleSave = async (draft: TaskDraft) => {
+  const syncTags = async (taskId: string, current: string[], desired: string[]) => {
+    const toAdd = desired.filter((id) => !current.includes(id))
+    const toRemove = current.filter((id) => !desired.includes(id))
+    for (const tagId of toAdd) await api.assignTag(taskId, tagId)
+    for (const tagId of toRemove) await api.removeTag(taskId, tagId)
+  }
+
+  const handleSave = async (draft: TaskDraft, tagIds: string[]) => {
     try {
       if (editing) {
         await api.updateTask(editing.id, draft)
+        await syncTags(editing.id, editing.tags.map((t) => t.id), tagIds)
       } else {
-        await api.createTask(project.id, draft)
+        const created = await api.createTask(project.id, draft)
+        await syncTags(created.id, [], tagIds)
         onTaskStatusChanged(project.id)
       }
       closeForm()
-      await load()
+      await Promise.all([load(), loadTags()])
     } catch (err) {
       if (err instanceof ApiError && err.status === 404 && !editing) {
         setFormOpen(false)
@@ -181,6 +211,9 @@ export function ProjectView({
             <PlusIcon />
             Nueva tarea
           </Button>
+          <Button variant="ghost" onClick={() => setStatsOpen(true)}>
+            Estadísticas
+          </Button>
           {project.status === 'active' ? (
             <Button variant="quiet" onClick={() => setConfirmInactive(true)}>
               Inactivar proyecto
@@ -207,6 +240,15 @@ export function ProjectView({
         />
         <Select
           options={[
+            { value: '', label: 'Etiqueta: todas' },
+            ...tags.map((tag) => ({ value: tag.id, label: tag.name })),
+          ]}
+          value={filterTag}
+          onChange={(e) => setFilterTag(e.target.value)}
+          aria-label="Filtrar por etiqueta"
+        />
+        <Select
+          options={[
             { value: 'priority', label: 'Ordenar por prioridad' },
             { value: 'due_date', label: 'Ordenar por fecha límite' },
           ]}
@@ -214,11 +256,12 @@ export function ProjectView({
           onChange={(e) => setSortBy(e.target.value as 'priority' | 'due_date')}
           aria-label="Criterio de orden"
         />
-        <Button
-          variant="ghost"
-          onClick={() => setOrder(order === 'asc' ? 'desc' : 'asc')}
-        >
+        <Button variant="ghost" onClick={() => setOrder(order === 'asc' ? 'desc' : 'asc')}>
           {order === 'asc' ? 'Ascendente' : 'Descendente'}
+        </Button>
+        <Button variant="ghost" onClick={() => setTagManagerOpen(true)}>
+          <TagIcon />
+          Etiquetas
         </Button>
       </div>
 
@@ -261,6 +304,7 @@ export function ProjectView({
                       setEditing(t)
                       setFormOpen(true)
                     }}
+                    onLogTime={setTimeTask}
                     onDragStart={(event) => {
                       setDraggingId(task.id)
                       event.dataTransfer.setData('text/plain', task.id)
@@ -280,7 +324,18 @@ export function ProjectView({
 
       {formOpen && (
         <Modal title={editing ? 'Editar tarea' : 'Nueva tarea'} onClose={closeForm}>
-          <TaskForm initial={editing ?? undefined} onSave={handleSave} onCancel={closeForm} />
+          <TaskForm
+            initial={editing ?? undefined}
+            tags={tags}
+            onSave={handleSave}
+            onCreateTag={async (name) => {
+              const tag = await api.createTag(name)
+              setTags((current) => [...current, tag])
+              return tag
+            }}
+            onError={onShowError}
+            onCancel={closeForm}
+          />
         </Modal>
       )}
 
@@ -289,6 +344,29 @@ export function ProjectView({
           projectName={project.name}
           onCreated={handleMissingProjectCreated}
           onClose={() => setMissingDraft(null)}
+        />
+      )}
+
+      {tagManagerOpen && (
+        <TagManager
+          initialTags={tags}
+          onClose={() => setTagManagerOpen(false)}
+          onCreated={(tag) => setTags((current) => [...current, tag])}
+          onDeleted={(tagId) => {
+            setTags((current) => current.filter((t) => t.id !== tagId))
+            setFilterTag((current) => (current === tagId ? '' : current))
+            load()
+          }}
+        />
+      )}
+
+      {statsOpen && <StatsPanel onClose={() => setStatsOpen(false)} />}
+
+      {timeTask && (
+        <TimeLogModal
+          task={timeTask}
+          onClose={() => setTimeTask(null)}
+          onSaved={() => setTimeTask(null)}
         />
       )}
 

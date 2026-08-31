@@ -1,7 +1,8 @@
 import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from 'react'
 
-import type { Priority, TaskStatus } from '../api/types'
-import { CalendarIcon } from './icons'
+import type { Priority, TagOut, TaskStatus } from '../api/types'
+import { dueState, dueStateLabel } from '../lib/taskUtils'
+import { CalendarIcon, TimerIcon } from './icons'
 
 type ButtonVariant = 'primary' | 'ghost' | 'quiet' | 'danger'
 
@@ -96,6 +97,35 @@ export function DueDate({ dueDate }: { dueDate: string | null }) {
     <span className="due-date">
       <CalendarIcon />
       {dueDate}
+    </span>
+  )
+}
+
+export function TagChip({ tag }: { tag: TagOut }) {
+  return (
+    <span className="tag-chip" style={{ color: tag.color, borderColor: tag.color }}>
+      {tag.name}
+    </span>
+  )
+}
+
+export function DueBadge({ dueDate, completed }: { dueDate: string | null; completed: boolean }) {
+  const state = dueState({
+    due_date: dueDate,
+    status: completed ? 'done' : 'todo',
+    completed_at: completed ? 'x' : null,
+  })
+  if (!state || state === 'ok') return null
+  const label = dueStateLabel(state)
+  return <span className={`due-badge ${state}`}>{label}</span>
+}
+
+export function TimeBadge({ minutes }: { minutes?: number }) {
+  if (!minutes) return null
+  return (
+    <span className="time-badge">
+      <TimerIcon />
+      {minutes}m
     </span>
   )
 }

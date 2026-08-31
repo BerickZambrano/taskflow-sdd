@@ -1,5 +1,5 @@
 import uuid
-from datetime import date
+from datetime import UTC, date, datetime
 
 from app.core.enums import Priority, TaskStatus
 from app.core.exceptions import ConflictError, NotFoundError
@@ -61,6 +61,7 @@ class TaskService:
         project_id: uuid.UUID,
         status: TaskStatus | None = None,
         priority: Priority | None = None,
+        tag_id: uuid.UUID | None = None,
         sort_by: str = "priority",
         order: str = "asc",
         page: int = 1,
@@ -73,6 +74,7 @@ class TaskService:
             project_id,
             status=status,
             priority=priority,
+            tag_id=tag_id,
             sort_by=sort_by,
             order=order,
             page=page,
@@ -103,6 +105,9 @@ class TaskService:
             task.priority = priority
         if status is not _NOT_SET:
             task.status = status
+        task.completed_at = (
+            datetime.now(UTC) if task.status == TaskStatus.DONE else None
+        )
         if due_date is not _NOT_SET:
             task.due_date = due_date
         if assignee_id is not _NOT_SET:
