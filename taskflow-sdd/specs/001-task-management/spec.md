@@ -51,6 +51,9 @@ y reglas de negocio que preserven la integridad del trabajo.
   ENTONCES el sistema DEBE marcar el proyecto como inactivo. SI el proyecto tiene tareas
   sin completar, ENTONCES el sistema DEBE bloquear la inactivación e informar en español
   que todas las tareas deben estar completadas. El proyecto NO se elimina físicamente.
+- **RF-7b** — Reactivar proyecto. CUANDO el usuario reactiva un proyecto inactivo,
+  ENTONCES el sistema DEBE marcarlo de nuevo como activo. SI el proyecto ya está activo
+  o no existe, ENTONCES el sistema DEBE informarlo en español.
 
 ### Tareas
 
@@ -109,7 +112,7 @@ y reglas de negocio que preserven la integridad del trabajo.
 
 ## Criterios de finalización
 
-- Todos los RF-1 a RF-13 están implementados y cumplen sus criterios de aceptación.
+- Todos los RF-1 a RF-13 y RF-7b están implementados y cumplen sus criterios de aceptación.
 - `pytest -q` pasa sin errores.
 - Las reglas de negocio (duplicados, bloqueos, transiciones, inactivación) están cubiertas por tests.
 - No existe funcionalidad fuera de lo contemplado en esta spec.

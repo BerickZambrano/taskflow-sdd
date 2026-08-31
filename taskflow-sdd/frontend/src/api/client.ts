@@ -86,7 +86,10 @@ export const api = {
     return request(`/projects/${id}`)
   },
 
-  async updateProject(id: string, patch: Partial<Pick<ProjectOut, 'name' | 'description'>>): Promise<ProjectOut> {
+  async updateProject(
+    id: string,
+    patch: Partial<Pick<ProjectOut, 'name' | 'description' | 'status'>>,
+  ): Promise<ProjectOut> {
     return request(`/projects/${id}`, json('PATCH', patch))
   },
 

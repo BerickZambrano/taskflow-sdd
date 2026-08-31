@@ -1,7 +1,6 @@
 export type TaskStatus = 'todo' | 'in_progress' | 'done'
 export type Priority = 'low' | 'medium' | 'high'
 export type ProjectStatus = 'active' | 'inactive'
-
 export interface UserOut {
   id: string
   username: string

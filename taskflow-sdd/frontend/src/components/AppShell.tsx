@@ -13,7 +13,7 @@ interface AppShellProps {
   theme: 'light' | 'dark'
   onSelectProject: (id: string) => void
   onProjectCreated: (project: ProjectOut) => void
-  onProjectInactivated: () => void
+  onProjectStatusChanged: () => void
   onToggleTheme: () => void
   onLogout: () => void
 }
@@ -25,7 +25,7 @@ export function AppShell({
   theme,
   onSelectProject,
   onProjectCreated,
-  onProjectInactivated,
+  onProjectStatusChanged,
   onToggleTheme,
   onLogout,
 }: AppShellProps) {
@@ -67,7 +67,7 @@ export function AppShell({
             key={selected.id}
             project={selected}
             onProjectCreated={onProjectCreated}
-            onProjectInactivated={onProjectInactivated}
+            onProjectStatusChanged={onProjectStatusChanged}
             onShowError={showError}
           />
         ) : (

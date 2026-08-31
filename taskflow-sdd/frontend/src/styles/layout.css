@@ -357,27 +357,22 @@
   min-width: 0;
 }
 
-.task-title-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
 .task-title {
   font-size: 16px;
+  margin-bottom: 6px;
 }
 
 .task-desc {
   color: var(--ink-2);
   font-size: 13.5px;
-  margin: 4px 0 8px;
+  margin: 0 0 10px;
 }
 
 .task-meta {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 20px;
+  flex-wrap: wrap;
 }
 
 .due-date {

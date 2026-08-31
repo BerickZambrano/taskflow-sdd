@@ -179,6 +179,36 @@ def test_delete_project_all_tasks_done_returns_204(client: TestClient) -> None:
     assert detail.json()["status"] == "inactive"
 
 
+def test_reactivate_project_returns_200(client: TestClient) -> None:
+    token = _register_and_login(client)
+    project_id = _create_project(client, token)
+    _add_task(project_id, TaskStatus.DONE)
+    client.delete(f"/projects/{project_id}", headers=_auth(token))
+
+    response = client.patch(
+        f"/projects/{project_id}",
+        json={"status": "active"},
+        headers=_auth(token),
+    )
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "active"
+
+
+def test_patch_inactivate_with_pending_tasks_returns_409(client: TestClient) -> None:
+    token = _register_and_login(client)
+    project_id = _create_project(client, token)
+    _add_task(project_id, TaskStatus.TODO)
+
+    response = client.patch(
+        f"/projects/{project_id}",
+        json={"status": "inactive"},
+        headers=_auth(token),
+    )
+
+    assert response.status_code == 409
+
+
 def test_projects_require_auth_returns_401(client: TestClient) -> None:
     response = client.get("/projects")
     assert response.status_code == 401

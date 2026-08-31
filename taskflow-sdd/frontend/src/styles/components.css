@@ -160,23 +160,29 @@
   align-items: flex-end;
   gap: 2px;
 }
-.priority span {
+.priority .bar {
   width: 4px;
   border-radius: 2px;
   background: var(--ink-3);
 }
-.priority.low span:nth-child(1) {
+.priority .label {
+  margin-left: 6px;
+  font-size: 12px;
+  line-height: 1;
+  color: var(--ink-3);
+}
+.priority.low .bar:nth-child(1) {
   height: 5px;
   background: var(--priority-low);
 }
-.priority.medium span:nth-child(1),
-.priority.medium span:nth-child(2) {
+.priority.medium .bar:nth-child(1),
+.priority.medium .bar:nth-child(2) {
   height: 7px;
   background: var(--priority-medium);
 }
-.priority.high span:nth-child(1),
-.priority.high span:nth-child(2),
-.priority.high span:nth-child(3) {
+.priority.high .bar:nth-child(1),
+.priority.high .bar:nth-child(2),
+.priority.high .bar:nth-child(3) {
   height: 9px;
   background: var(--priority-high);
 }

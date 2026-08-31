@@ -79,7 +79,7 @@ export default function App() {
       .catch(() => undefined)
   }
 
-  const handleProjectInactivated = () => {
+  const handleProjectStatusChanged = () => {
     loadProjects().catch(() => undefined)
   }
 
@@ -95,7 +95,7 @@ export default function App() {
       theme={theme}
       onSelectProject={setSelectedId}
       onProjectCreated={handleProjectCreated}
-      onProjectInactivated={handleProjectInactivated}
+      onProjectStatusChanged={handleProjectStatusChanged}
       onToggleTheme={() => setTheme((t) => (t === 'light' ? 'dark' : 'light'))}
       onLogout={handleLogout}
     />

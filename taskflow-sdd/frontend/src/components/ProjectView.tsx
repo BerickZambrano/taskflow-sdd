@@ -13,7 +13,7 @@ import { PlusIcon } from './icons'
 interface ProjectViewProps {
   project: ProjectWithStats
   onProjectCreated: (project: ProjectOut) => void
-  onProjectInactivated: () => void
+  onProjectStatusChanged: () => void
   onShowError: (message: string) => void
 }
 
@@ -22,7 +22,7 @@ const PAGE_SIZE = 20
 export function ProjectView({
   project,
   onProjectCreated,
-  onProjectInactivated,
+  onProjectStatusChanged,
   onShowError,
 }: ProjectViewProps) {
   const [tasks, setTasks] = useState<TaskOut[]>([])
@@ -125,9 +125,18 @@ export function ProjectView({
     try {
       await api.inactivateProject(project.id)
       setConfirmInactive(false)
-      onProjectInactivated()
+      onProjectStatusChanged()
     } catch (err) {
       setConfirmInactive(false)
+      if (err instanceof ApiError) onShowError(err.message)
+    }
+  }
+
+  const handleReactivate = async () => {
+    try {
+      await api.updateProject(project.id, { status: 'active' })
+      onProjectStatusChanged()
+    } catch (err) {
       if (err instanceof ApiError) onShowError(err.message)
     }
   }
@@ -152,9 +161,13 @@ export function ProjectView({
             <PlusIcon />
             Nueva tarea
           </Button>
-          {project.status === 'active' && (
+          {project.status === 'active' ? (
             <Button variant="quiet" onClick={() => setConfirmInactive(true)}>
               Inactivar proyecto
+            </Button>
+          ) : (
+            <Button variant="ghost" onClick={handleReactivate}>
+              Reactivar proyecto
             </Button>
           )}
         </div>

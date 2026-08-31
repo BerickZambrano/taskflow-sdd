@@ -37,6 +37,7 @@ class ProjectService:
         owner_id: uuid.UUID,
         name: object = _NOT_SET,
         description: object = _NOT_SET,
+        status: object = _NOT_SET,
     ) -> Project:
         project = self.get(project_id, owner_id)
         new_name = project.name if name is _NOT_SET else name
@@ -47,6 +48,18 @@ class ProjectService:
         new_description = (
             project.description if description is _NOT_SET else description
         )
+        if status is not _NOT_SET:
+            new_status: ProjectStatus = status
+            if (
+                new_status == ProjectStatus.INACTIVE
+                and project.status == ProjectStatus.ACTIVE
+                and self._tasks.has_incomplete(project_id)
+            ):
+                raise ConflictError(
+                    "Todas las tareas deben estar completadas para inactivar "
+                    "el proyecto."
+                )
+            project.status = new_status
         project = self._projects.update(project, new_name, new_description)
         self._projects.commit()
         return project

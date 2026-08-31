@@ -130,7 +130,7 @@ Cliente → [API: schema Pydantic + auth] → [Service: reglas RF] → [Reposito
 | GET `/projects` | — | `200` lista | — | RF-5 |
 | POST `/projects` | `{name, description?}` | `201` | `409` nombre duplicado; `422` | RF-4 |
 | GET `/projects/{id}` | — | `200` | `404` no existe | RF-5 |
-| PATCH `/projects/{id}` | `{name?, description?}` | `200` | `404`; `409` nombre duplicado; `422` | RF-6 |
+| PATCH `/projects/{id}` | `{name?, description?, status?}` | `200` | `404`; `409` nombre duplicado; `409` inactivación con tareas pendientes; `422` | RF-6, RF-7b |
 | DELETE `/projects/{id}` | — | `204` (inactivado) | `409` tareas sin completar; `404` | RF-7 |
 
 ### Tareas (requieren Bearer)
@@ -158,6 +158,7 @@ SI ORDEN[nuevo] <= ORDEN[actual]     -> error 409 "No se puede retroceder el est
   modificar una tarea completada."
 - **RF-7**: inactivar proyecto con tareas no `done` → `409` "Todas las tareas deben
   estar completadas para inactivar el proyecto."
+- **RF-7b**: reactivar proyecto (PATCH `status=active`) → `200` con estado `active`.
 - **RF-4/RF-6**: duplicado de nombre (insensible a mayúsculas, mismo propietario) → `409`
   "Ya existe un proyecto con ese nombre."
 - **RF-8**: proyecto inexistente al crear tarea → `404` "El proyecto no existe."

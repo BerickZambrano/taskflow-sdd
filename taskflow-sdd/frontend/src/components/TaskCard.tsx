@@ -28,12 +28,10 @@ export function TaskCard({ task, onAdvance, onEdit, busy }: TaskCardProps) {
   return (
     <li className={`task-card ${isDone ? 'done' : ''}`}>
       <div className="task-main">
-        <div className="task-title-row">
-          <h3 className="task-title">{task.title}</h3>
-          <StatusChip status={task.status} />
-        </div>
+        <h3 className="task-title">{task.title}</h3>
         {task.description && <p className="task-desc">{task.description}</p>}
         <div className="task-meta">
+          <StatusChip status={task.status} />
           <PriorityMark priority={task.priority} />
           <DueDate dueDate={task.due_date} />
         </div>

@@ -48,9 +48,10 @@ una tarea en un proyecto inexistente) con diálogos accionables.
   está `done`, ENTONCES el sistema DEBE bloquear su edición con un aviso en español.
 - **RF-7** — Editar tarea. CUANDO el usuario edita una tarea no completada, ENTONCES el
   sistema DEBE guardar los cambios.
-- **RF-8** — Inactivar proyecto. CUANDO el usuario confirma la inactivación, ENTONCES el
-  sistema DEBE ejecutarla si todas las tareas están `done`; SI quedan tareas pendientes,
-  ENTONCES el sistema DEBE advertirlo sin inactivar.
+- **RF-8** — Inactivar y reactivar proyecto. CUANDO el usuario confirma la
+  inactivación, ENTONCES el sistema DEBE ejecutarla si todas las tareas están `done`; SI
+  quedan tareas pendientes, ENTONCES el sistema DEBE advertirlo sin inactivar. CUANDO el
+  usuario reactiva un proyecto archivado, ENTONCES el sistema DEBE marcarlo como activo.
 - **RF-9** — Modal de proyecto inexistente. CUANDO el sistema detecta que el proyecto no
   existe (p. ej. `404`), ENTONCES el sistema DEBE ofrecer crearlo; CUANDO el usuario lo
   confirma, ENTONCES el sistema DEBE crearlo y continuar con la tarea pendiente.

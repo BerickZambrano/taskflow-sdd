@@ -73,10 +73,10 @@ export function PriorityMark({ priority, withLabel = true }: { priority: Priorit
   }
   return (
     <span className={`priority ${priority}`} title={`Prioridad ${labels[priority].toLowerCase()}`}>
-      <span />
-      <span />
-      <span />
-      {withLabel && <span style={{ marginLeft: 6, fontSize: 12, color: 'var(--ink-3)' }}>{labels[priority]}</span>}
+      <span className="bar" />
+      <span className="bar" />
+      <span className="bar" />
+      {withLabel && <span className="label">{labels[priority]}</span>}
     </span>
   )
 }

@@ -139,3 +139,26 @@ def test_inactivate_success_when_all_tasks_done() -> None:
 
     assert project.status == ProjectStatus.INACTIVE
     repo.commit.assert_called_once()
+
+
+def test_reactivate_project() -> None:
+    repo = create_autospec(ProjectRepository)
+    repo.get_by_id.return_value = _build_project(status=ProjectStatus.INACTIVE)
+    repo.update.return_value = _build_project(status=ProjectStatus.ACTIVE)
+    service = _make_service(repo)
+
+    project = service.update(PROJECT_ID, OWNER_ID, status=ProjectStatus.ACTIVE)
+
+    assert project.status == ProjectStatus.ACTIVE
+    repo.commit.assert_called_once()
+
+
+def test_update_to_inactive_blocks_with_incomplete_tasks() -> None:
+    repo = create_autospec(ProjectRepository)
+    repo.get_by_id.return_value = _build_project()
+    tasks = Mock()
+    tasks.has_incomplete.return_value = True
+    service = _make_service(repo, tasks)
+
+    with pytest.raises(ConflictError):
+        service.update(PROJECT_ID, OWNER_ID, status=ProjectStatus.INACTIVE)
