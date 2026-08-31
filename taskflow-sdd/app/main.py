@@ -14,9 +14,24 @@ settings = get_settings()
 
 app = FastAPI(title="TaskFlow")
 
+# Normalizar la URL del frontend eliminando comillas, espacios o barras al final
+frontend_url = settings.frontend_url.strip().strip("'\"").rstrip("/")
+
+origins = [
+    frontend_url,
+    "https://taskflow-sdd.vercel.app",
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:5173",
+]
+
+# Eliminar duplicados manteniendo el orden
+origins = list(dict.fromkeys(origins))
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.frontend_url, "http://localhost:5173"],
+    allow_origins=origins,
+    allow_origin_regex=r"https://taskflow-sdd-.*-beritozambrano-2391s-projects\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
